@@ -209,3 +209,5 @@ For issues or questions:
 ## License
 
 Proprietary - For authorized use only
+## Solution & Architecture
+See **docs/solution.md** for the system overview, runbook, and links to ADRs and diagrams.

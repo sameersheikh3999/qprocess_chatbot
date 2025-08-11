@@ -1,0 +1,11 @@
+%% Mermaid C4-style Context Diagram (simplified)
+flowchart LR
+  user[End User] --> webUI[Web UI]
+  webUI --> api[Backend API]
+  api --> db[(Database)]
+  api --> llm[Anthropic Claude API]
+  style user stroke-width:2px
+  style webUI stroke-width:2px
+  style api stroke-width:2px
+  style db stroke-width:2px
+  style llm stroke-width:2px

@@ -1,0 +1,15 @@
+%% Mermaid Container Diagram (simplified)
+flowchart TB
+  subgraph Frontend
+    spa[React SPA]
+  end
+  subgraph Backend
+    drf[Django REST API]
+    services[Services Layer]
+  end
+  db[(SQL Server or RDBMS)]
+  llm[Anthropic Claude (Messages API)]
+  spa --> drf
+  drf --> services
+  services --> db
+  services --> llm
