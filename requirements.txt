@@ -9,7 +9,7 @@ django-cors-headers==4.3.1
 django-mssql-backend==2.8.1
 pyodbc==5.2.0
 
-# AI Integration - Claude
+# AI Integration - Groq
 anthropic==0.35.0
 httpx==0.28.1
 

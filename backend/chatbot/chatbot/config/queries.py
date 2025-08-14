@@ -7,12 +7,12 @@ Organized by functionality for easy maintenance and reuse.
 
 # Group validation queries
 CHECK_GROUP_EXISTS = """
-    SELECT Name FROM [QTasks].[dbo].[QCheck_Groups] WHERE Name=%s
+    SELECT Name FROM [QTasks3].[dbo].[QCheck_Groups] WHERE Name=%s
 """
 
 FIND_SIMILAR_GROUPS = """
     SELECT TOP 5 Name 
-    FROM [QTasks].[dbo].[QCheck_Groups] 
+    FROM [QTasks3].[dbo].[QCheck_Groups] 
     WHERE Name LIKE %s 
     ORDER BY Name
 """
@@ -22,8 +22,8 @@ GET_ACTIVE_USERS = """
     -- Only return users who are properly configured for task creation
     -- These users exist in both QCheck_Users and QCheck_Groups tables
     SELECT DISTINCT u.FullName
-    FROM [QTasks].[dbo].[QCheck_Users] u
-    INNER JOIN [QTasks].[dbo].[QCheck_Groups] g ON u.FullName = g.Name
+    FROM [QTasks3].[dbo].[QCheck_Users] u
+    INNER JOIN [QTasks3].[dbo].[QCheck_Groups] g ON u.FullName = g.Name
     WHERE u.isdeleted <> 1
     ORDER BY u.FullName
 """
@@ -31,7 +31,7 @@ GET_ACTIVE_USERS = """
 # Legacy query - shows all active users (kept for reference)
 GET_ALL_ACTIVE_USERS_LEGACY = """
     SELECT FullName 
-    FROM [QTasks].[dbo].[QCheck_Users] 
+    FROM [QTasks3].[dbo].[QCheck_Users] 
     WHERE isdeleted <> 1
     ORDER BY FullName
 """
@@ -68,7 +68,7 @@ GET_TEST_USER = """
 CREATE_TASK_PROCEDURE = """
     SET NOCOUNT ON;
     DECLARE @NewInstanceId INT;
-    EXEC [QTasks].[dbo].[QCheck_CreateTaskThroughChatbot_WithNameResolution]
+    EXEC [QTasks3].[dbo].[QCheck_CreateTaskThroughChatbot]
         @TaskName=N'{task_name}',
         @MainController=N'{main_controller}',
         @Controllers=N'{controllers}',
@@ -103,7 +103,7 @@ ADD_TO_PRIORITY_LIST_PROCEDURE = """
 CREATE_TASK_PROCEDURE_PARAMETERIZED = """
     SET NOCOUNT ON;
     DECLARE @NewInstanceId INT;
-    EXEC [QTasks].[dbo].[QCheck_CreateTaskThroughChatbot_WithNameResolution]
+    EXEC [QTasks3].[dbo].[QCheck_CreateTaskThroughChatbot]
         @TaskName=%s,
         @MainController=%s,
         @Controllers=%s,

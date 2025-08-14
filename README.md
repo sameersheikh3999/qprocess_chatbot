@@ -4,210 +4,225 @@ AI-powered task creation system for QCheck/QTasks. Create tasks using natural la
 
 ## Features
 
-- Natural language task creation
-- Recurring task scheduling
-- Multi-user assignment
-- Priority list management
-- Timezone-aware scheduling
-- Checklist items support
+- **Natural Language Processing**: Create tasks using conversational language
+- **Database Integration**: Seamlessly integrates with existing QCheck/QTasks database
+- **User Management**: Automatic user validation and configuration
+- **Task Scheduling**: Support for recurring tasks and complex scheduling
+- **Modern UI**: Clean, responsive React frontend
+- **Docker Support**: Easy deployment with Docker containers
 
-## Quick Start
+## Quick Start with Docker
 
-### 1. Prerequisites
+### Prerequisites
 
-- Python 3.8+
-- SQL Server with QTasks database
-- Claude API key from Anthropic
+1. **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop/)
+2. **SQL Server** - SQL Server 2019 or later with QTasks3 database
+3. **Groq API Key** - [Get one here](https://console.groq.com/)
 
-### 2. Database Setup
+### Installation
 
-The chatbot requires a custom stored procedure in your QCheck database.
+1. **Download and extract** the application files
+2. **Configure environment**:
+   ```bash
+   cp env.example .env
+   # Edit .env with your database and API settings
+   ```
+3. **Install database stored procedure**:
+   - Run `database/install_stored_procedure.sql` in SQL Server Management Studio
+4. **Start the application**:
+   ```bash
+   docker-compose up -d
+   ```
+5. **Access the application**:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
 
-#### Install Required Stored Procedure
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
-```bash
-# Run the installation script in SQL Server Management Studio
-# File: database/install_stored_procedure.sql
+## Manual Installation
+
+### Backend Setup
+
+1. **Install Python dependencies**:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+2. **Configure database** in `backend/chatbot/chatbot/settings.py`:
+   ```python
+   DATABASES = {
+       'default': {
+           'ENGINE': 'mssql',
+           'NAME': 'QTasks3',
+           'USER': '',  # Leave blank for Windows Authentication
+           'PASSWORD': '',  # Leave blank for Windows Authentication
+           'HOST': 'YOUR_SERVER_NAME\\INSTANCE_NAME',
+           'PORT': '',
+           'OPTIONS': {
+               'driver': 'ODBC Driver 17 for SQL Server',
+               'trusted_connection': 'yes',
+           },
+       }
+   }
+   ```
+
+3. **Set environment variables**:
+   ```bash
+   export GROQ_API_KEY=your-api-key
+   export DJANGO_SETTINGS_MODULE=chatbot.settings
+   ```
+
+4. **Run migrations**:
+   ```bash
+   python manage.py migrate
+   ```
+
+5. **Start the server**:
+   ```bash
+   python manage.py runserver
+   ```
+
+### Frontend Setup
+
+1. **Install Node.js dependencies**:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. **Start the development server**:
+   ```bash
+   npm start
+   ```
+
+## Database Requirements
+
+### Required Tables
+- `QCheck_Users` - User information
+- `QCheck_Groups` - Group definitions
+- `QCheck_Checklists` - Task templates
+- `QCheck_ChecklistInstances` - Task instances
+- `QCheck_ActiveChecklists` - Active task tracking
+- `QCheck_Assignments` - Task assignments
+- `QCheck_ChecklistManagers` - Task managers
+
+### Required Stored Procedures
+- `QCheck_CreateTaskThroughChatbot` - Main task creation procedure
+- `QCheck_CreateSimple_part1` - Task creation helper
+- `QCheck_AddManager` - Add task managers
+- `QCheck_AddAssignedTo` - Add task assignees
+- `QCheck_AddItem` - Add task items
+- `QCheck_UpdateSchedule_part1` - Schedule management
+- `QCheck_UpdateSchedule_Part2` - Schedule management
+- `QCheck_DuplicateNameCheck` - Duplicate prevention
+- `Util_fn_List_To_Table` - String parsing utility
+
+### User Configuration
+Users must exist in both `QCheck_Users` and `QCheck_Groups` tables with matching names to be able to create tasks through the chatbot.
+
+## API Endpoints
+
+- `GET /api/users/` - Get list of configured users
+- `POST /api/chat/` - Send chat message and create tasks
+- `GET /api/tasks/` - Get user's tasks (if implemented)
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GROQ_API_KEY` | Groq API key for AI service | Required |
+| `DB_NAME` | Database name | QTasks3 |
+| `DB_HOST` | Database server | DESKTOP-BIP1CP7\\SQLEXPRESS |
+| `DB_USER` | Database username | (Windows Auth) |
+| `DB_PASSWORD` | Database password | (Windows Auth) |
+| `SECRET_KEY` | Django secret key | Generated |
+
+### Database Connection
+
+The application supports both Windows Authentication and SQL Server Authentication:
+
+#### Windows Authentication (Recommended)
+```python
+'USER': '',
+'PASSWORD': '',
+'OPTIONS': {'trusted_connection': 'yes'}
 ```
 
-#### Verify Installation
-
-```bash
-# Run verification to ensure all prerequisites are met
-# File: database/verify_installation.sql
+#### SQL Server Authentication
+```python
+'USER': 'your_username',
+'PASSWORD': 'your_password',
+'OPTIONS': {'trusted_connection': 'no'}
 ```
-
-The stored procedure integrates with your existing QCheck procedures:
-- QCheck_CreateSimple_part1
-- QCheck_AddManager
-- QCheck_AddAssignedTo
-- QCheck_UpdateSchedule_part1
-- QCheck_UpdateSchedule_Part2
-
-For detailed instructions, see [DATABASE_SETUP.md](DATABASE_SETUP.md)
-
-### 3. Backend Setup
-
-```bash
-# Navigate to backend
-cd backend/chatbot
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your credentials:
-# - CLAUDE_API_KEY
-# - Database connection details
-```
-
-### 4. Frontend Setup
-
-```bash
-# Navigate to frontend
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-```
-
-### 5. Run the Application
-
-```bash
-# Option 1: Use the start script
-python scripts/start_server.py
-
-# Option 2: Run Django directly
-cd backend/chatbot
-python manage.py runserver 0.0.0.0:8000
-```
-
-Access the application at http://localhost:3000
-
-## User Configuration
-
-### Setting Up Users
-
-Users must exist in both `QCheck_Users` and `QCheck_Groups` tables with matching names.
-
-```bash
-# Create missing personal groups for users
-python scripts/manage_users.py --create-missing
-```
-
-### Checking Configured Users
-
-```sql
-SELECT u.FullName, g.Name as GroupName 
-FROM QCheck_Users u 
-INNER JOIN QCheck_Groups g ON u.FullName = g.Name 
-WHERE u.isdeleted <> 1
-```
-
-## API Usage
-
-### Endpoint
-
-`POST http://localhost:8000/api/chat/`
-
-### Request Format
-
-```json
-{
-    "message": "Create a team meeting for next Friday at 2pm",
-    "user": "User Name",
-    "mainController": "Valid Group Name",
-    "timezone": "America/New_York"
-}
-```
-
-### Response Examples
-
-**Success:**
-```json
-{
-    "reply": "Task created successfully! The task has been added to the system."
-}
-```
-
-**Need More Info:**
-```json
-{
-    "reply": "I need the following information: assignees for the task."
-}
-```
-
-## Natural Language Examples
-
-- "Schedule a team meeting for next Friday with John and Jane"
-- "Create a recurring task to check reports every Monday at 10am"
-- "Remind me to review documents tomorrow at 5pm"
-- "Make a weekly task for status updates, add to priority list"
-
-### Time Interpretations
-
-- "morning" → 10:00 AM
-- "afternoon" → 2:00 PM  
-- "evening" → 7:00 PM
-- "end of day" → 5:00 PM
 
 ## Troubleshooting
 
-### No Users in Dropdown
+### Common Issues
 
-Run the user management script:
-```bash
-python scripts/manage_users.py --create-missing
+1. **"Could not find stored procedure"**
+   - Run the database installation script
+   - Verify the procedure exists in the correct database
+
+2. **"User not configured"**
+   - Users need personal groups in `QCheck_Groups`
+   - Run the user management script: `python scripts/manage_users.py --list`
+
+3. **Database connection failed**
+   - Verify SQL Server is running
+   - Check firewall settings
+   - Ensure ODBC Driver 17 is installed
+
+4. **Frontend can't connect to backend**
+   - Check CORS settings
+   - Verify both services are running
+   - Check network connectivity
+
+### Logs
+
+- **Backend logs**: Check Django console output or `/app/logs/django.log`
+- **Frontend logs**: Check browser developer console
+- **Docker logs**: `docker-compose logs -f`
+
+## Development
+
+### Project Structure
+```
+qprocess-chatbot/
+├── backend/                    # Django backend
+│   ├── chatbot/               # Main Django app
+│   │   ├── api/              # API views
+│   │   ├── services/         # Business logic
+│   │   ├── config/           # Configuration
+│   │   └── models.py         # Database models
+│   ├── requirements.txt      # Python dependencies
+│   └── manage.py            # Django management
+├── frontend/                  # React frontend
+│   ├── src/                 # Source code
+│   ├── public/              # Static files
+│   └── package.json         # Node.js dependencies
+├── database/                 # Database scripts
+├── scripts/                  # Utility scripts
+└── docs/                     # Documentation
 ```
 
-### Database Connection Issues
+### Adding New Features
 
-1. Check credentials in `.env`
-2. Verify SQL Server is running
-3. Test connection with `python backend/chatbot/manage.py dbshell`
-
-### API Key Errors
-
-Ensure `CLAUDE_API_KEY` is set in `.env` file
-
-### Task Creation Fails
-
-Check that:
-- MainController exists in QCheck_Groups table
-- Stored procedure is installed (run verification script)
-- All required parameters are provided
-
-## Project Structure
-
-```
-├── backend/
-│   └── chatbot/         # Django REST API
-├── frontend/            # React UI
-├── database/            # SQL installation scripts
-├── scripts/             # Utility scripts
-├── .env.example         # Environment template
-└── requirements.txt     # Python dependencies
-```
-
-## Documentation
-
-- [DATABASE_SETUP.md](DATABASE_SETUP.md) - Complete database installation guide
-- [API Reference](backend/chatbot/README.md) - Detailed API documentation
-- [Frontend Guide](frontend/README.md) - UI customization and development
+1. **Backend**: Add new API endpoints in `backend/chatbot/api/views/`
+2. **Frontend**: Add new components in `frontend/src/`
+3. **Database**: Add new stored procedures as needed
+4. **Testing**: Test with the verification scripts
 
 ## Support
 
 For issues or questions:
-1. Check the troubleshooting section above
-2. Review DATABASE_SETUP.md for database issues
-3. Ensure all prerequisites are installed
+1. Check the [DEPLOYMENT.md](DEPLOYMENT.md) guide
+2. Review the troubleshooting section
+3. Check logs for error details
+4. Contact support with specific error messages
 
 ## License
 
-Proprietary - For authorized use only
-## Solution & Architecture
-See **docs/solution.md** for the system overview, runbook, and links to ADRs and diagrams.
+This project is proprietary software. All rights reserved.

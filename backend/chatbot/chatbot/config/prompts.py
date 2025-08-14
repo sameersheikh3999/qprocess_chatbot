@@ -2,7 +2,7 @@
 System prompts and prompt engineering configuration for the chatbot AI service.
 
 This module contains all system prompts, prompt templates, and prompt engineering
-logic used by the Claude AI integration.
+logic used by the Groq AI integration.
 """
 
 import datetime
@@ -181,7 +181,7 @@ class PromptHints:
     @staticmethod
     def generate_hint_text(pre_extracted):
         """
-        Generate hint text for Claude based on pre-extracted parameters.
+        Generate hint text for Groq based on pre-extracted parameters.
         
         Args:
             pre_extracted (dict): Pre-extracted parameters

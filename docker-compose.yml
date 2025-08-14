@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Backend Django Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: qprocess-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=chatbot.settings
+      - DJANGO_ENV=production
+      - DB_NAME=${DB_NAME:-QTasks3}
+      - DB_USER=${DB_USER:-}
+      - DB_PASSWORD=${DB_PASSWORD:-}
+      - DB_HOST=${DB_HOST:-DESKTOP-BIP1CP7\\SQLEXPRESS}
+      - DB_PORT=${DB_PORT:-}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      - ./backend:/app
+      - ./logs:/app/logs
+    depends_on:
+      - frontend
+    networks:
+      - qprocess-network
+    restart: unless-stopped
+
+  # Frontend React Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: qprocess-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - qprocess-network
+    restart: unless-stopped
+
+networks:
+  qprocess-network:
+    driver: bridge
+
+volumes:
+  logs:

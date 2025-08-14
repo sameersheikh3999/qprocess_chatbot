@@ -104,7 +104,7 @@ class DatabaseService:
                 logger.info(f"Retrieved {len(users)} properly configured users")
                 
                 # Log configuration rate for monitoring
-                cursor.execute("SELECT COUNT(*) FROM [QTasks].[dbo].[QCheck_Users] WHERE isdeleted <> 1")
+                cursor.execute("SELECT COUNT(*) FROM [QTasks3].[dbo].[QCheck_Users] WHERE isdeleted <> 1")
                 total_active = cursor.fetchone()[0]
                 config_rate = (len(users) / total_active * 100) if total_active > 0 else 0
                 logger.info(f"User configuration rate: {config_rate:.1f}% ({len(users)}/{total_active})")

@@ -91,10 +91,9 @@ class TaskService:
             # Get updated history that includes the current message
             history = SessionService.get_session_history(session)
             
-            # Ensure history has at least one message for Claude API
-            if not history or len(history) == 0:
+            # Ensure history has at least one message for Groq API
+            if not history:
                 history = [{"role": "user", "content": user_message}]
-                logger.debug("History was empty, initialized with current user message")
             
             # Get current date in user's timezone for context
             current_date = DateTimeService.get_current_date_in_timezone(user_timezone)
@@ -175,7 +174,7 @@ class TaskService:
                 response_data['debug'] = {
                     'instance_id': instance_id,
                     'parameters': params,
-                    'claude_response': content if 'content' in locals() else None,
+                    'groq_response': content if 'content' in locals() else None,
                     'execution_time': time.time() - request_start_time
                 }
             

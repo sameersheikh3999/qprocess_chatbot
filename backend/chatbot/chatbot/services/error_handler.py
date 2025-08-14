@@ -233,7 +233,7 @@ class ErrorHandler:
             return self._format_database_error(error_str, context)
         
         # Handle AI service errors
-        if isinstance(error, AIServiceError) or 'claude' in error_str.lower():
+        if isinstance(error, AIServiceError) or 'groq' in error_str.lower():
             return self._format_ai_service_error(error_str, context)
         
         # Handle validation errors
@@ -520,13 +520,13 @@ class ErrorHandler:
                 raise e
             else:
                 # Wrap in appropriate service error
-                if 'database' in operation.lower():
+                if isinstance(e, DatabaseError):
                     raise DatabaseError(
                         self.format_user_error(e, operation_context),
                         'DATABASE_OPERATION_FAILED',
                         {'tracking_id': tracking_id, 'original_error': str(e)}
                     )
-                elif 'ai' in operation.lower() or 'claude' in operation.lower():
+                elif 'ai' in operation.lower() or 'groq' in operation.lower():
                     raise AIServiceError(
                         self.format_user_error(e, operation_context),
                         'AI_SERVICE_OPERATION_FAILED',

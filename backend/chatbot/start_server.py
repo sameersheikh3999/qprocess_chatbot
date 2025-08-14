@@ -20,16 +20,16 @@ def check_environment():
         print(f"⚠️  No .env file found at {env_path}")
     
     # Check for required environment variables
-    api_key = os.getenv('CLAUDE_API_KEY')
+    api_key = os.getenv('GROQ_API_KEY')
     if not api_key:
-        print("\n❌ ERROR: CLAUDE_API_KEY not found in environment!")
+        print("\n❌ ERROR: GROQ_API_KEY not found in environment!")
         print("\nPlease ensure your .env file contains:")
-        print("CLAUDE_API_KEY=your-api-key-here")
+        print("GROQ_API_KEY=your-api-key-here")
         print("\nOr set it in your environment:")
-        print("export CLAUDE_API_KEY='your-api-key-here'")
+        print("export GROQ_API_KEY='your-api-key-here'")
         return False
     
-    print("✓ CLAUDE_API_KEY found in environment")
+    print("✓ GROQ_API_KEY found in environment")
     print(f"✓ API Key: {api_key[:20]}...{api_key[-4:]}")  # Show partial key for verification
     return True
 

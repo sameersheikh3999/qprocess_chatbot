@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,16 +85,19 @@ WSGI_APPLICATION = 'chatbot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'QTasks',
-        'USER': 'sa',
-        'PASSWORD': 'YourStrong!Password123',  # Change this to your password
-        'HOST': '127.0.0.1',
-        'PORT': '1433',
+        'NAME': 'QTasks3',
+        'USER': '',  # Leave blank for Trusted_Connection
+        'PASSWORD': '',  # Leave blank for Trusted_Connection
+        'HOST': 'DESKTOP-BIP1CP7\\SQLEXPRESS',
+        'PORT': '',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
+            'trusted_connection': 'yes',
         },
     }
 }
+
+
 
 
 # Password validation
