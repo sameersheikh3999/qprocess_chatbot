@@ -15,8 +15,8 @@ This guide explains how to deploy the QProcess Chatbot application using Docker.
    - The `QTasks3` database with required tables and stored procedures
    - ODBC Driver 17 for SQL Server
 
-3. **Groq API Key**
-   - Sign up at: https://console.groq.com/
+3. **Claude API Key**
+- Sign up at: https://console.anthropic.com/
    - Get your API key
 
 ## Quick Start
@@ -59,7 +59,7 @@ qprocess-chatbot/
    DB_PORT=
 
    # AI Service Configuration
-   GROQ_API_KEY=your-actual-groq-api-key
+   CLAUDE_API_KEY=your-actual-claude-api-key
 
    # Django Configuration
    SECRET_KEY=your-django-secret-key

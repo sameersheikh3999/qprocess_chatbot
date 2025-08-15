@@ -17,7 +17,7 @@ AI-powered task creation system for QCheck/QTasks. Create tasks using natural la
 
 1. **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop/)
 2. **SQL Server** - SQL Server 2019 or later with QTasks3 database
-3. **Groq API Key** - [Get one here](https://console.groq.com/)
+3. **Claude API Key** - [Get one here](https://console.anthropic.com/)
 
 ### Installation
 
@@ -69,7 +69,7 @@ For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 3. **Set environment variables**:
    ```bash
-   export GROQ_API_KEY=your-api-key
+   export CLAUDE_API_KEY=your-api-key
    export DJANGO_SETTINGS_MODULE=chatbot.settings
    ```
 
@@ -133,7 +133,7 @@ Users must exist in both `QCheck_Users` and `QCheck_Groups` tables with matching
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GROQ_API_KEY` | Groq API key for AI service | Required |
+| `CLAUDE_API_KEY` | Claude API key for AI service | Required |
 | `DB_NAME` | Database name | QTasks3 |
 | `DB_HOST` | Database server | DESKTOP-BIP1CP7\\SQLEXPRESS |
 | `DB_USER` | Database username | (Windows Auth) |

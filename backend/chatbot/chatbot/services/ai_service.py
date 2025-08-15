@@ -2,7 +2,7 @@
 AI Service Module
 
 This module provides centralized AI functionality for the chatbot application,
-including Groq API integration, request handling, and response processing.
+including Claude API integration, request handling, and response processing.
 """
 
 import os
@@ -26,24 +26,25 @@ logger = logging.getLogger(__name__)
 
 class AIService:
     """
-    Service class for handling Groq AI API interactions, including
+    Service class for handling Claude AI API interactions, including
     configuration, request processing, and response parsing.
     """
     
     def __init__(self):
-        """Initialize the AI service with Groq API configuration."""
-        self.api_key = os.getenv('GROQ_API_KEY')
+        """Initialize the AI service with Claude API configuration."""
+        self.api_key = os.getenv('CLAUDE_API_KEY')
         if not self.api_key:
-            raise ValueError("GROQ_API_KEY environment variable is not set. Please set it in your .env file or environment.")
+            raise ValueError("CLAUDE_API_KEY environment variable is not set. Please set it in your .env file or environment.")
         
-        self.api_url = 'https://api.groq.com/openai/v1/chat/completions'
-        self.model = 'llama3-70b-8192'  # Using Llama 3 70B model on Groq
+        self.api_url = 'https://api.anthropic.com/v1/messages'
+        self.model = 'claude-opus-4-20250514'  # Using Claude Opus 4 model
         self.max_tokens = 1024
         
-        # Default headers for Groq API
+        # Default headers for Claude API
         self.headers = {
-            'Authorization': f'Bearer {self.api_key}',
+            'x-api-key': self.api_key,
             'Content-Type': 'application/json',
+            'anthropic-version': '2023-06-01'
         }
         
         # Retry configuration
@@ -65,19 +66,19 @@ class AIService:
         """Log token usage to CSV file."""
         total_tokens = input_tokens + output_tokens
         
-        # Calculate cost based on Groq model pricing (prices per million tokens)
-        if 'llama3-70b' in model.lower():
-            # Llama 3 70B: $0.59 input, $0.79 output per million
-            cost = (input_tokens * 0.59 / 1_000_000) + (output_tokens * 0.79 / 1_000_000)
-        elif 'llama3-8b' in model.lower():
-            # Llama 3 8B: $0.05 input, $0.10 output per million
-            cost = (input_tokens * 0.05 / 1_000_000) + (output_tokens * 0.10 / 1_000_000)
-        elif 'mixtral' in model.lower():
-            # Mixtral 8x7B: $0.14 input, $0.42 output per million
-            cost = (input_tokens * 0.14 / 1_000_000) + (output_tokens * 0.42 / 1_000_000)
+        # Calculate cost based on Claude model pricing (prices per million tokens)
+        if 'claude-opus' in model.lower():
+            # Claude Opus: $15.00 input, $75.00 output per million
+            cost = (input_tokens * 15.00 / 1_000_000) + (output_tokens * 75.00 / 1_000_000)
+        elif 'claude-sonnet' in model.lower():
+            # Claude Sonnet: $3.00 input, $15.00 output per million
+            cost = (input_tokens * 3.00 / 1_000_000) + (output_tokens * 15.00 / 1_000_000)
+        elif 'claude-haiku' in model.lower():
+            # Claude Haiku: $0.25 input, $1.25 output per million
+            cost = (input_tokens * 0.25 / 1_000_000) + (output_tokens * 1.25 / 1_000_000)
         else:
-            # Default to Llama 3 70B pricing if unknown
-            cost = (input_tokens * 0.59 / 1_000_000) + (output_tokens * 0.79 / 1_000_000)
+            # Default to Claude Opus pricing if unknown
+            cost = (input_tokens * 15.00 / 1_000_000) + (output_tokens * 75.00 / 1_000_000)
         
         timestamp = datetime.now().isoformat()
         
@@ -112,10 +113,10 @@ class AIService:
             
         return timeout
     
-    def send_request_to_groq(self, messages: List[Dict], system_prompt: str, 
+    def send_request_to_claude(self, messages: List[Dict], system_prompt: str, 
                               timeout: int, debug_mode: bool = False) -> Tuple[bool, Dict[str, Any]]:
         """
-        Send a request to Groq API with retry logic and error handling.
+        Send a request to Claude API with retry logic and error handling.
         
         Args:
             messages (List[Dict]): Conversation history messages
@@ -126,81 +127,86 @@ class AIService:
         Returns:
             Tuple[bool, Dict]: (success, response_data)
         """
-        # Convert to Groq API format (OpenAI-compatible)
-        groq_messages = [{"role": "system", "content": system_prompt}] + messages
+        # Convert to Claude API format
+        claude_messages = []
+        for msg in messages:
+            if msg['role'] == 'user':
+                claude_messages.append({"role": "user", "content": msg['content']})
+            elif msg['role'] == 'assistant':
+                claude_messages.append({"role": "assistant", "content": msg['content']})
         
         payload = {
             'model': self.model,
-            'messages': groq_messages,
+            'messages': claude_messages,
             'max_tokens': self.max_tokens,
             'temperature': 0.1,  # Low temperature for consistent task extraction
-            'stream': False
+            'system': system_prompt
         }
         
         try:
-            logger.debug(f"Sending Groq API request")
+            logger.debug(f"Sending Claude API request")
             logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
             response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=timeout)
             response_data = response.json()
             
             if response.status_code != 200:
                 error_message = response_data.get("error", {}).get("message", str(response_data))
-                logger.error(f"Groq API error: Status {response.status_code}, Response: {response_data}")
+                logger.error(f"Claude API error: Status {response.status_code}, Response: {response_data}")
                 
                 # Log failed request with available token info
                 if 'usage' in response_data:
-                    input_tokens = response_data['usage'].get('prompt_tokens', 0)
-                    output_tokens = response_data['usage'].get('completion_tokens', 0)
+                    input_tokens = response_data['usage'].get('input_tokens', 0)
+                    output_tokens = response_data['usage'].get('output_tokens', 0)
                     self._log_token_usage(self.model, input_tokens, output_tokens, success=False, error=error_message)
                 
-                raise AIServiceError(f'LLM error: {error_message}', 'GROQ_API_ERROR')
+                raise AIServiceError(f'LLM error: {error_message}', 'CLAUDE_API_ERROR')
             
             # Validate response structure
-            if 'choices' not in response_data or not response_data['choices']:
-                logger.error(f"No choices in Groq response: {response_data}")
+            if 'content' not in response_data or not response_data['content']:
+                logger.error(f"No content in Claude response: {response_data}")
                 raise AIServiceError('Invalid LLM response format', 'INVALID_RESPONSE_FORMAT')
             
             # Extract content from response
-            content = response_data['choices'][0]['message']['content']
+            content = response_data['content'][0]['text']
             
             # Extract and log token usage
             if 'usage' in response_data:
-                input_tokens = response_data['usage'].get('prompt_tokens', 0)
-                output_tokens = response_data['usage'].get('completion_tokens', 0)
+                input_tokens = response_data['usage'].get('input_tokens', 0)
+                output_tokens = response_data['usage'].get('output_tokens', 0)
                 self._log_token_usage(self.model, input_tokens, output_tokens, success=True)
                 logger.info(f"Token usage - Input: {input_tokens}, Output: {output_tokens}")
             
             # Log the response for debugging
             if debug_mode:
-                logger.info(f"Groq raw response: {content}")
+                logger.info(f"Claude raw response: {content}")
             else:
-                logger.debug(f"Groq raw response: {content[:500]}...")
+                logger.debug(f"Claude raw response: {content[:500]}...")
             
             return True, {'content': content, 'raw_response': response_data}
             
         except requests.exceptions.Timeout as e:
-            logger.error(f"Groq API timeout: {e}")
-            raise AIServiceError('Request timeout - please try again', 'GROQ_API_TIMEOUT')
+            logger.error(f"Claude API timeout: {e}")
+            raise AIServiceError('Request timeout - please try again', 'CLAUDE_API_TIMEOUT')
             
         except requests.exceptions.RequestException as e:
-            logger.error(f"Groq API request error: {e}")
-            raise AIServiceError('Failed to communicate with AI service', 'GROQ_API_REQUEST_ERROR')
+            logger.error(f"Claude API request error: {e}")
+            raise AIServiceError('Failed to communicate with AI service', 'CLAUDE_API_REQUEST_ERROR')
             
         except AIServiceError:
             # Re-raise AIServiceError as-is
             raise
             
         except Exception as e:
-            logger.error(f"Unexpected error calling Groq API: {type(e).__name__}: {e}")
-            error_handler.log_error(e, {'operation': 'groq_api_call'})
+            logger.error(f"Unexpected error calling Claude API: {type(e).__name__}: {e}")
+            error_handler.log_error(e, {'operation': 'claude_api_call'})
             raise AIServiceError('Sorry, I could not understand the AI response. Please try again.', 'UNEXPECTED_ERROR')
     
     def parse_json_response(self, content: str) -> Tuple[bool, Dict[str, Any]]:
         """
-        Parse JSON from Groq's response content.
+        Parse JSON from Claude's response content.
         
         Args:
-            content (str): Raw response content from Groq
+            content (str): Raw response content from Claude
             
         Returns:
             Tuple[bool, Dict]: (is_json_response, parsed_json)
@@ -215,7 +221,7 @@ class AIService:
             try:
                 json_str = json_match.group(1) if '```' in content else json_match.group(0)
                 parsed_json = json.loads(json_str)
-                logger.debug(f"Successfully parsed JSON from Groq response")
+                logger.debug(f"Successfully parsed JSON from Claude response")
                 return True, parsed_json
             except json.JSONDecodeError as e:
                 logger.error(f"JSON parsing error: {e}, Content: {json_match.group(0)[:200]}...")
@@ -281,9 +287,9 @@ class AIService:
         
         logger.debug(f"Validated history with {len(validated_history)} messages")
         
-        # Send request to Groq
+        # Send request to Claude
         try:
-            success, response_data = self.send_request_to_groq(
+            success, response_data = self.send_request_to_claude(
                 validated_history, system_prompt, timeout, debug_mode
             )
         except AIServiceError as e:
@@ -309,9 +315,9 @@ class AIService:
             if "on the" in user_message.lower() and "month" in user_message.lower():
                 logger.warning(f"UC08 PATTERN DETECTED: Monthly with specific day")
                 logger.warning(f"User message: {user_message}")
-                logger.warning(f"Groq's FreqType: {parsed_json.get('FreqType')}")
-                logger.warning(f"Groq's FreqRecurrance: {parsed_json.get('FreqRecurrance')}")
-                logger.warning(f"Groq's FreqInterval: {parsed_json.get('FreqInterval')}")
+                logger.warning(f"Claude's FreqType: {parsed_json.get('FreqType')}")
+                logger.warning(f"Claude's FreqRecurrance: {parsed_json.get('FreqRecurrance')}")
+                logger.warning(f"Claude's FreqInterval: {parsed_json.get('FreqInterval')}")
             
             # Merge pre-extracted parameters with LLM parameters
             final_params = self._merge_parameters(parsed_json, pre_extracted)

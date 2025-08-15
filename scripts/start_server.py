@@ -27,7 +27,7 @@ def check_environment():
     """Check that required environment variables are set."""
     print("🔍 Checking environment configuration...")
     
-    required_vars = ['GROQ_API_KEY', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'SECRET_KEY']
+    required_vars = ['CLAUDE_API_KEY', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'SECRET_KEY']
     missing_vars = []
     
     # Load .env file if it exists

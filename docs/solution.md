@@ -44,14 +44,14 @@ repo_extract/
 3. API returns normalized results to the UI.
 
 ## 4) External Dependencies & Contracts
-- **Groq API**: Use `Authorization: Bearer <api-key>` header.
+- **Claude API**: Use `x-api-key: <api-key>` header.
 - **Django REST Framework** for request/response and serializers.
 - **DB backend** (for SQL Server, use `mssql-django`).
 
 ## 5) Configuration & Secrets
 Create `.env` from `.env.example` (do not commit secrets).
-- `GROQ_API_KEY` — provisioned by customer
-- `GROQ_MODEL` — default set in code/services
+- `CLAUDE_API_KEY` — provisioned by customer
+- `CLAUDE_MODEL` — default set in code/services
 - DB connection vars (name/user/password/host/port)
 Inject env via your secret store/CI.
 
@@ -89,7 +89,7 @@ npm start
 
 **Environment checks**
 - Ensure DB connectivity and stored procedure presence.
-- Set `GROQ_API_KEY` and test `/api/chat/` happy path.
+- Set `CLAUDE_API_KEY` and test `/api/chat/` happy path.
 
 ## 9) Risks & Mitigations
 - **LLM variability** → strict schema + validation + low temperature.
