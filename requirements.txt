@@ -32,4 +32,4 @@ urllib3==2.5.0
 tqdm==4.67.1
 
 #mssql-django
-mssql-django=1.6.0
+mssql-django==1.6.0
