@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './TaskManager.module.css';
 
-const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : '';
+const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : (process.env.REACT_APP_API_BASE_URL || 'http://backend:8000');
 
 function TaskManager({ selectedUser }) {
   const [tasks, setTasks] = React.useState([]);

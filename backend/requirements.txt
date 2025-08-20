@@ -1,0 +1,35 @@
+# QProcess Chatbot Production Dependencies
+
+# Core Django Framework
+Django==4.2.11
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+
+# Database Support - SQL Server
+django-mssql-backend==2.8.1
+pyodbc==5.2.0
+
+# AI Integration - Claude
+anthropic==0.35.0
+httpx==0.28.1
+
+# Environment and Configuration
+python-dotenv==1.1.1
+
+# Date/Time Processing
+dateparser==1.2.0
+
+# HTTP Requests
+requests==2.32.4
+
+# Core Python Dependencies
+pydantic==2.11.7
+typing-extensions==4.14.0
+certifi==2025.6.15
+urllib3==2.5.0
+
+# Development Quality of Life (Optional)
+tqdm==4.67.1
+
+#mssql-django
+mssql-django==1.6.0

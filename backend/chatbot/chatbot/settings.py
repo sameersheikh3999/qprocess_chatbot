@@ -30,7 +30,13 @@ SECRET_KEY = 'django-insecure-8lb9h5hi!@lw8xpy@a43u$3r8azgc&0=tjr$hex&ofno-++(*%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+allowed_hosts_env = os.environ.get("DJANGO_ALLOWED_HOSTS", "*")
+
+if allowed_hosts_env.strip() == "*":
+    ALLOWED_HOSTS = ["*"]
+else:
+    # Split comma-separated values and strip spaces
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(",") if host.strip()]
 
 
 # Application definition
@@ -86,13 +92,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'QTasks3',
-        'USER': '',  # Leave blank for Trusted_Connection
-        'PASSWORD': '',  # Leave blank for Trusted_Connection
-        'HOST': 'DESKTOP-BIP1CP7\\SQLEXPRESS',
-        'PORT': '',
+        'USER': 'chatbot',  # Leave blank for Trusted_Connection
+        'PASSWORD': 'chatbot',  # Leave blank for Trusted_Connection
+        'HOST': 'dev-sql-02.acmenetwork.com',
+        'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'yes',
+            'trusted_connection': 'no',
         },
     }
 }

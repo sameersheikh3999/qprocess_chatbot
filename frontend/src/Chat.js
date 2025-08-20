@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./Chat.module.css";
 
-const API_BASE_URL = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "";
+const API_BASE_URL = process.env.NODE_ENV === "development" ? "http://localhost:8000" : (process.env.REACT_APP_API_BASE_URL || 'http://backend:8000');
 
 const AVATARS = {
   user: "/logo192.png",
