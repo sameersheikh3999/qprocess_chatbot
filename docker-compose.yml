@@ -1,10 +1,10 @@
-version: '3.8'
-
 services:
   # Backend Django Service
   backend:
     build:
       context: ./backend
+      args:
+        DJANGO_ALLOWED_HOSTS: ${ComputerName}.${UserDnsDomain}
       dockerfile: Dockerfile
     container_name: qprocess-backend
     ports:
@@ -12,15 +12,16 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=chatbot.settings
       - DJANGO_ENV=production
+      - DJANGO_ALLOWED_HOSTS=${ComputerName}.${UserDnsDomain}
       - DB_NAME=${DB_NAME:-QTasks3}
-      - DB_USER=${DB_USER:-}
-      - DB_PASSWORD=${DB_PASSWORD:-}
-      - DB_HOST=${DB_HOST:-DESKTOP-BIP1CP7\\SQLEXPRESS}
-      - DB_PORT=${DB_PORT:-}
+      - DB_USER=${DB_USER:-chatbot}
+      - DB_PASSWORD=${DB_PASSWORD:-chatbot}
+      - DB_HOST=${DB_HOST:-dev-sql-02.acmenetwork.com}
+      - DB_PORT=${DB_PORT:-1433}
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-    volumes:
-      - ./backend:/app
-      - ./logs:/app/logs
+#   volumes:
+#      - ./backend/chatbot:/app
+#      - ./logs:/app/logs
     depends_on:
       - frontend
     networks:
@@ -31,14 +32,16 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        REACT_APP_API_BASE_URL: http://${ComputerName}.${UserDnsDomain}:8000
       dockerfile: Dockerfile
     container_name: qprocess-frontend
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_BASE_URL=http://localhost:8000
+      - REACT_APP_API_BASE_URL=http://${ComputerName}.${UserDnsDomain}:8000
     volumes:
-      - ./frontend:/app
+#      - ./frontend:/app
       - /app/node_modules
     networks:
       - qprocess-network

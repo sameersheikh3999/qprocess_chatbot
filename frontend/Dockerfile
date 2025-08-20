@@ -1,8 +1,18 @@
 # Use Node.js 18 Alpine image
 FROM node:18-alpine
 
+# Declare a build-time variable
+ARG REACT_APP_API_BASE_URL
+
+# make it a runtime ENV too
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
 # Set work directory
 WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache curl
+
 
 # Copy package files
 COPY package*.json ./

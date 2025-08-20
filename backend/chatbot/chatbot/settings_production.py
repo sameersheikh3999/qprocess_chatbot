@@ -15,9 +15,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': os.getenv('DB_NAME', 'QTasks3'),
-        'USER': os.getenv('DB_USER', ''),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'DESKTOP-BIP1CP7\\SQLEXPRESS'),
+        'USER': os.getenv('DB_USER', 'chatbot'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'chatbot'),
+        'HOST': os.getenv('DB_HOST', 'dev-sql-02'),
         'PORT': os.getenv('DB_PORT', ''),
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
@@ -32,6 +32,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://backend:8000",
+    "http://frontend:3000"
 ]
 
 # Logging configuration

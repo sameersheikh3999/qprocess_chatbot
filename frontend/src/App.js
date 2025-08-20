@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : '';
+const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : (process.env.REACT_APP_API_BASE_URL || 'http://backend:8000');
+
+console.log(`Setting up a direct connection to the API via: ${API_BASE_URL}`);
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -34,10 +36,13 @@ function App() {
     }
     
     // Fetch users from backend
-    fetch(`${API_BASE_URL}/api/users/`)
-      .then(res => res.json())
-      .then(data => setUsers(data))
-      .catch(() => setUsers([]));
+	fetch(`${API_BASE_URL}/api/users/`)
+		.then(res => res.json())
+		.then(data => setUsers(data))
+		.catch(err => {
+			setUsers([]);
+		});
+  
   }, []);
 
   // Close dropdown when clicking outside
